@@ -33,12 +33,17 @@ if scelta != "Scegli...":
     nota_attuale = dati_albero['nota']
     nuova_nota = st.text_area("Modifica la nota:", value=nota_attuale)
     
-    # Tasto per salvare le modifiche direttamente sul foglio Google
+   # Tasto per salvare le modifiche
     if st.button("Salva nota su Google Sheets"):
-        # Troviamo l'indice della riga da aggiornare
-        idx = df.index[df['nome'] == scelta].tolist()[0]
-        df.at[idx, 'nota'] = nuova_nota
-        
-        # Aggiorniamo il database online
-        conn.update(data=df)
-        st.success("Nota salvata con successo sul database online!")
+        try:
+            # Troviamo l'indice della riga da aggiornare
+            idx = df.index[df['nome'] == scelta].tolist()[0]
+            df.at[idx, 'nota'] = nuova_nota
+            
+            # Aggiorniamo il database online
+            conn.update(spreadsheet=st.secrets["connections"]["gsheets"]["spreadsheet"], data=df)
+            st.success("Nota salvata con successo!")
+            st.balloons() # Un po' di festa per il successo!
+        except Exception as e:
+            st.error(f"Errore durante il salvataggio: {e}")
+            st.info("Verifica di aver impostato il foglio Google come 'Editor' per chiunque abbia il link.")
